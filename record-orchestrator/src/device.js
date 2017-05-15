@@ -22,21 +22,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict';
+const EventEmitter = require('events').EventEmitter;
+const EventHubClient = require('azure-event-hubs').Client;
 
-const device = require('./device');
-const microservice = require('./microservice');
+const listeners = [];
+const emitter = new EventEmitter();
+const client = EventHubClient.fromConnectionString(process.env.iotHubConnectionString);
 
-console.log('Starting Record Orchestrator');
- 
-require('dotenv').config();
+module.exports = emitter;
 
-device.on('message', (message) => {
-    console.log('Message received: ');
-    console.log(JSON.stringify(message.body));
-    console.log('');
-});
-
-device.on('err', (err) => {
-    console.error(err);
-});
+client.open()
+    .then(client.getPartitionIds.bind(client))
+    .then((partitionIds) =>
+        partitionIds.map((partitionId) =>
+            client.createReceiver('$Default', partitionId, { 'startAfterTime': Date.now() }).then((receiver) => {
+                console.log('Created partition receiver: ' + partitionId)
+                receiver.on('errorReceived', (err) => emitter.emit('error', err));
+                receiver.on('message', (message) => emitter.emit('message', message));
+            })
+        )
+    )
+    .catch((err) => emitter.emit('error', err));

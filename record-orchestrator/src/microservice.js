@@ -22,21 +22,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-'use strict';
+module.exports = {
+    getSchema,
+    decompressMessage,
+    storeMessage
+};
 
-const device = require('./device');
-const microservice = require('./microservice');
+function getSchema(name, version, cb) {
 
-console.log('Starting Record Orchestrator');
- 
-require('dotenv').config();
+}
 
-device.on('message', (message) => {
-    console.log('Message received: ');
-    console.log(JSON.stringify(message.body));
-    console.log('');
-});
+function decompressMessage(schema, message, cb) {
 
-device.on('err', (err) => {
-    console.error(err);
-});
+}
+
+function storeMessage(message, cb) {
+
+}

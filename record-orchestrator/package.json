@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/jonbgallant/azure-iot-avro/issues"
   },
-  "homepage": "https://github.com/jonbgallant/azure-iot-avro#readme"
+  "homepage": "https://github.com/jonbgallant/azure-iot-avro#readme",
+  "dependencies": {
+    "azure-event-hubs": "0.0.7",
+    "dotenv": "^4.0.0"
+  }
 }
