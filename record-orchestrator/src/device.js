@@ -38,7 +38,13 @@ client.open()
             client.createReceiver('$Default', partitionId, { 'startAfterTime': Date.now() }).then((receiver) => {
                 console.log('Created partition receiver: ' + partitionId)
                 receiver.on('errorReceived', (err) => emitter.emit('error', err));
-                receiver.on('message', (message) => emitter.emit('message', message));
+                receiver.on('message', (message) => {
+                    // TODO
+                    const schemaName = '';
+                    const schemaVersion = '';
+                    const payload = new Buffer('');
+                    emitter.emit('message', schemaName, schemaVersion, payload);
+                });
             })
         )
     )

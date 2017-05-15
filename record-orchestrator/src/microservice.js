@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+const request = require('request');
+
 module.exports = {
     getSchema,
     decompressMessage,
@@ -29,13 +31,14 @@ module.exports = {
 };
 
 function getSchema(name, version, cb) {
-
+    // GET /api/schema?schemaId={myid}
 }
 
 function decompressMessage(schema, message, cb) {
-
+    // POST /api/decompress
 }
 
 function storeMessage(message, cb) {
-
+    // PUT /api/message
+    // { message: <decoded-message-body>, deviceInfo?: <something> }
 }

@@ -31,10 +31,23 @@ console.log('Starting Record Orchestrator');
  
 require('dotenv').config();
 
-device.on('message', (message) => {
-    console.log('Message received: ');
-    console.log(JSON.stringify(message.body));
-    console.log('');
+device.on('message', (schemaName, schemaVersion, payload) => {
+    console.log('Received store message request');
+    microservice.getSchema(schemaName, schemaVersion, (err, schema) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        microservice.decompressMessage(schema, payload, (err, message) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            microservice.storeMessage(message, () => {
+                console.log('Finished storing message');
+            });
+        });
+    })
 });
 
 device.on('err', (err) => {
