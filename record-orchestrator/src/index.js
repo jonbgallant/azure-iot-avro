@@ -24,6 +24,8 @@ SOFTWARE.
 
 'use strict';
 
+require('dotenv').config();
+
 const fs = require('fs');
 const path = require('path');
 const device = require('./device');
@@ -31,26 +33,23 @@ const microservice = require('./microservice');
 
 console.log('Starting Record Orchestrator');
 
-const SERVICE_FABRIC_CONFIG = path.join(__dirname, '..', '..', 'ExpressPkg.Endpoints.txt');
+const deviceConnection = device.createConnection();
 
-let port = process.env.PORT || 3000;
-if (fs.existsSync(SERVICE_FABRIC_CONFIG)) {
-    const endpointsFile = fs.readFileSync(SERVICE_FABRIC_CONFIG, 'utf8');
-    port = endpointsFile.split(';')[3];
+function handleError(err) {
+    // TODO: do something more clever here, e.g. error reporting service/abnalytics
+    console.error(err);
 }
 
-require('dotenv').config();
-
-device.on('message', (schemaName, schemaVersion, payload) => {
+deviceConnection.on('message', (schemaId, payload) => {
     console.log('Received store message request');
-    microservice.getSchema(schemaName, schemaVersion, (err, schema) => {
+    microservice.getSchema(schemaId, (err, schema) => {
         if (err) {
-            console.error(err);
+            handleError(err);
             return;
         }
         microservice.decompressMessage(schema, payload, (err, message) => {
             if (err) {
-                console.error(err);
+                handleError(err);
                 return;
             }
             microservice.storeMessage(message, () => {
@@ -60,6 +59,6 @@ device.on('message', (schemaName, schemaVersion, payload) => {
     })
 });
 
-device.on('err', (err) => {
-    console.error(err);
+deviceConnection.on('err', (err) => {
+    handleError(err);
 });

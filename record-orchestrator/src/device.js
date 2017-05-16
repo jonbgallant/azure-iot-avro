@@ -25,27 +25,34 @@ SOFTWARE.
 const EventEmitter = require('events').EventEmitter;
 const EventHubClient = require('azure-event-hubs').Client;
 
-const listeners = [];
-const emitter = new EventEmitter();
-const client = EventHubClient.fromConnectionString(process.env.iotHubConnectionString);
+if (!process.env.IOT_HUB_CONNECTION_STRING) {
+    console.error('Environment variable IOT_HUB_CONNECTION_STRING is not defined');
+    process.exit(-1);
+}
 
-module.exports = emitter;
+module.exports = {
+    createConnection
+};
 
-client.open()
-    .then(client.getPartitionIds.bind(client))
-    .then((partitionIds) =>
-        partitionIds.map((partitionId) =>
-            client.createReceiver('$Default', partitionId, { 'startAfterTime': Date.now() }).then((receiver) => {
-                console.log('Created partition receiver: ' + partitionId)
-                receiver.on('errorReceived', (err) => emitter.emit('error', err));
-                receiver.on('message', (message) => {
-                    // TODO
-                    const schemaName = '';
-                    const schemaVersion = '';
-                    const payload = new Buffer('');
-                    emitter.emit('message', schemaName, schemaVersion, payload);
-                });
-            })
+function createConnection() {
+    const listeners = [];
+    const emitter = new EventEmitter();
+    const client = EventHubClient.fromConnectionString(process.env.IOT_HUB_CONNECTION_STRING);
+
+    client.open()
+        .then(client.getPartitionIds.bind(client))
+        .then((partitionIds) =>
+            partitionIds.map((partitionId) =>
+                client.createReceiver('$Default', partitionId, { 'startAfterTime': Date.now() }).then((receiver) => {
+                    console.log('Created partition receiver: ' + partitionId)
+                    receiver.on('errorReceived', (err) => emitter.emit('error', err));
+                    receiver.on('message', (message) => {
+                        emitter.emit('message', message.applicationProperties['avro-schema'], message.body);
+                    });
+                })
+            )
         )
-    )
-    .catch((err) => emitter.emit('error', err));
+        .catch((err) => emitter.emit('error', err));
+
+    return emitter;
+}
