@@ -21,3 +21,45 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+'use strict';
+
+const fs = require('fs');
+const path = require('path');
+const device = require('./device');
+const microservice = require('./microservice');
+
+console.log('Starting Record Orchestrator');
+
+const SERVICE_FABRIC_CONFIG = path.join(__dirname, '..', '..', 'ExpressPkg.Endpoints.txt');
+
+let port = process.env.PORT || 3000;
+if (fs.existsSync(SERVICE_FABRIC_CONFIG)) {
+    const endpointsFile = fs.readFileSync(SERVICE_FABRIC_CONFIG, 'utf8');
+    port = endpointsFile.split(';')[3];
+}
+
+require('dotenv').config();
+
+device.on('message', (schemaName, schemaVersion, payload) => {
+    console.log('Received store message request');
+    microservice.getSchema(schemaName, schemaVersion, (err, schema) => {
+        if (err) {
+            console.error(err);
+            return;
+        }
+        microservice.decompressMessage(schema, payload, (err, message) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            microservice.storeMessage(message, () => {
+                console.log('Finished storing message');
+            });
+        });
+    })
+});
+
+device.on('err', (err) => {
+    console.error(err);
+});
