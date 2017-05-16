@@ -25,11 +25,31 @@ SOFTWARE.
 const avro = require('avro');
 
 module.exports = {
+  compress,
   decompress
 };
 
-function decompress(schema, payload, cb) {
-  const decoder = new avro.streams.RawDecoder(schema);
+function compress(schemaId, type, messageData, cb) {
+  if (type.isValid(payload)) {
+    // Keep the API sync/async consistent, see https://nodejs.org/api/process.html#process_process_nexttick_callback_args
+    setImmediate(() => cb(new Error('Invalid payload')));
+    return;
+  }
+
+  const encoder = new avro.streams.RawEncoder(type);
+  const dataChunks = [];
+  encoder.on('data', (data) => dataChunks.push(data));
+  encoder.on('finish', () => {
+    const message = new Message(Buffer.concat(dataChunks));
+    message.properties.add('avro-schema', schemaId);
+    cb(undefined, message);
+  });
+  encoder.write(messageData);
+  encoder.end();
+}
+
+function decompress(type, payload, cb) {
+  const decoder = new avro.streams.RawDecoder(type);
   const dataChunks = [];
   decoder.on('data', (data) => dataChunks.push(data));
   decoder.on('finish', () => {
