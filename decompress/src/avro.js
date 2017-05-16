@@ -40,6 +40,6 @@ function decompress(schema, payload, cb) {
     }
   });
   decoder.setEncoding('utf8');
-  decoder.write(message.body);
+  decoder.write(payload);
   decoder.end();
 }
