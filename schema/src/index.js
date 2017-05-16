@@ -49,25 +49,15 @@ app.get('/api/schema', function (req, res) {
         value: parts[1]
       }]
     }
-  } else { // We only got the name
-    querySpec = {
-      query: 'SELECT * FROM root r WHERE r.name=@name',
-      parameters: [{
-        name: '@name',
-        value: req.query.schemaId
-      }]
-    }
+  } else { // Request was malformed
+    res.sendStatus(400)
   }
 
   docDbClient.queryDocuments(collectionUrl, querySpec).toArray(function (err, results) {
-    if (err) {
-      res.send({
-        error: err.body
-      })
+    if (err || results.length !== 1) {
+      res.sendStatus(500)
     } else {
-      res.send({
-        schemas: results
-      })
+      res.send(results[0].schema)
     }
   })
 })
