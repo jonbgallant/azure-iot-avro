@@ -22,9 +22,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 require('dotenv').config()
-var DocumentDBClient = require('documentdb').DocumentClient
-var express = require('express')
-var app = express()
+const DocumentDBClient = require('documentdb').DocumentClient
+const express = require('express')
+const path = require('path')
+const fs = require('fs')
+const app = express()
+
+// Configure dynamic port assignment
+const SERVICE_FABRIC_CONFIG = path.join(__dirname, '..', 'SchemasPkg.Endpoints.txt')
+var sfConfExists = fs.existsSync(SERVICE_FABRIC_CONFIG)
+var sfPort = -1
+var defaultFallBackPort = 3000
+var port = process.env.PORT || defaultFallBackPort
+if (sfConfExists) {
+  const endpointsFile = fs.readFileSync(SERVICE_FABRIC_CONFIG, 'utf8')
+  sfPort = endpointsFile.split(';')[3]
+  port = sfPort
+}
 
 // Set up Cosmos connection
 var docDbClient = new DocumentDBClient(process.env.HOST, {
@@ -62,6 +76,32 @@ app.get('/api/schema', function (req, res) {
   })
 })
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!')
+app.get('/api/allSchemas', function (req, res) {
+  var querySpec = {
+    query: 'SELECT * FROM root r'
+  }
+
+  docDbClient.queryDocuments(collectionUrl, querySpec).toArray(function (err, results) {
+    if (err) {
+      res.sendStatus(500)
+    } else {
+      var schemas = []
+
+      results.forEach(s => {
+        var schema = {
+          schemaId: s.name + ':' + s.version,
+          schema: s.schema
+        }
+        schemas.push(schema)
+      })
+
+      res.send({
+        schemas: schemas
+      })
+    }
+  })
+})
+
+app.listen(port, function () {
+  console.log('listening on ' + port)
 })
