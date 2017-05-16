@@ -36,6 +36,7 @@ function getSchema(name, version, cb) {
 
 function decompressMessage(schema, message, cb) {
     // POST /api/decompress
+    // ?
 }
 
 function storeMessage(message, cb) {

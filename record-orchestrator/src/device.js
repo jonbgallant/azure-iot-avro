@@ -25,9 +25,14 @@ SOFTWARE.
 const EventEmitter = require('events').EventEmitter;
 const EventHubClient = require('azure-event-hubs').Client;
 
+if (!process.env.IOT_HUB_CONNECTION_STRING) {
+    console.error('Environment variable IOT_HUB_CONNECTION_STRING is not defined');
+    process.exit(-1);
+}
+
 const listeners = [];
 const emitter = new EventEmitter();
-const client = EventHubClient.fromConnectionString(process.env.iotHubConnectionString);
+const client = EventHubClient.fromConnectionString(process.env.IOT_HUB_CONNECTION_STRING);
 
 module.exports = emitter;
 

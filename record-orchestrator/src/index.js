@@ -24,6 +24,8 @@ SOFTWARE.
 
 'use strict';
 
+require('dotenv').config();
+
 const fs = require('fs');
 const path = require('path');
 const device = require('./device');
@@ -38,8 +40,6 @@ if (fs.existsSync(SERVICE_FABRIC_CONFIG)) {
     const endpointsFile = fs.readFileSync(SERVICE_FABRIC_CONFIG, 'utf8');
     port = endpointsFile.split(';')[3];
 }
-
-require('dotenv').config();
 
 device.on('message', (schemaName, schemaVersion, payload) => {
     console.log('Received store message request');
