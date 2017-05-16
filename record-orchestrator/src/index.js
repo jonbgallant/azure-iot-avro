@@ -24,11 +24,21 @@ SOFTWARE.
 
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
 const device = require('./device');
 const microservice = require('./microservice');
 
 console.log('Starting Record Orchestrator');
- 
+
+const SERVICE_FABRIC_CONFIG = path.join(__dirname, '..', '..', 'ExpressPkg.Endpoints.txt');
+
+let port = process.env.PORT || 3000;
+if (fs.existsSync(SERVICE_FABRIC_CONFIG)) {
+    const endpointsFile = fs.readFileSync(SERVICE_FABRIC_CONFIG, 'utf8');
+    port = endpointsFile.split(';')[3];
+}
+
 require('dotenv').config();
 
 device.on('message', (schemaName, schemaVersion, payload) => {
