@@ -21,3 +21,57 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+require('dotenv').config()
+var DocumentDBClient = require('documentdb').DocumentClient
+var express = require('express')
+var app = express()
+
+// Set up Cosmos connection
+var docDbClient = new DocumentDBClient(process.env.HOST, {
+  masterKey: process.env.AUTH_KEY
+})
+var databaseUrl = `dbs/${process.env.DATABASE_ID}`
+var collectionUrl = `${databaseUrl}/colls/${process.env.COLLECTION_ID}`
+
+app.get('/api/schema', function (req, res) {
+  var parts = req.query.schemaId.split(':')
+  var querySpec
+
+  // We got both a name and a version
+  if (parts.length > 1) {
+    querySpec = {
+      query: 'SELECT * FROM root r WHERE r.name=@name AND r.version=@version',
+      parameters: [{
+        name: '@name',
+        value: parts[0]
+      }, {
+        name: '@version',
+        value: parts[1]
+      }]
+    }
+  } else { // We only got the name
+    querySpec = {
+      query: 'SELECT * FROM root r WHERE r.name=@name',
+      parameters: [{
+        name: '@name',
+        value: req.query.schemaId
+      }]
+    }
+  }
+
+  docDbClient.queryDocuments(collectionUrl, querySpec).toArray(function (err, results) {
+    if (err) {
+      res.send({
+        error: err.body
+      })
+    } else {
+      res.send({
+        schemas: results
+      })
+    }
+  })
+})
+
+app.listen(3000, function () {
+  console.log('Example app listening on port 3000!')
+})
