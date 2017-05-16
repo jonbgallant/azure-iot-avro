@@ -62,6 +62,32 @@ app.get('/api/schema', function (req, res) {
   })
 })
 
+app.get('/api/allSchemas', function (req, res) {
+  var querySpec = {
+    query: 'SELECT * FROM root r'
+  }
+
+  docDbClient.queryDocuments(collectionUrl, querySpec).toArray(function (err, results) {
+    if (err) {
+      res.sendStatus(500)
+    } else {
+      var schemas = []
+
+      results.forEach(s => {
+        var schema = {
+          schemaId: s.name + ':' + s.version,
+          schema: s.schema
+        }
+        schemas.push(schema)
+      })
+
+      res.send({
+        schemas: schemas
+      })
+    }
+  })
+})
+
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!')
 })
