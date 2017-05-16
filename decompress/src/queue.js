@@ -52,16 +52,18 @@ function getNextDecompressionRequest(cb) {
       cb(err);
       return;
     }
-    // TODO
-    const schemaId = '';
-    const payload = '';
-    cb(undefined, schemaId, payload);
+    cb(undefined, message.customProperties['avro-schema'], message.body);
   });
 }
 
-function sendDecompressedMessage(cb) {
+function sendDecompressedMessage(schemaId, body, cb) {
   if (!serviceBusService) {
     throw new Error('Called `getNextMessage` without initializing the queue first');
   }
-  serviceBusService.sendQueueMessage(STORE_MESSAGE_QUEUE_NAME, message, cb);
+  serviceBusService.sendQueueMessage(STORE_MESSAGE_QUEUE_NAME, {
+    body,
+    customProperties: {
+      'avro-schema': schemaId
+    }
+  }, cb);
 }
