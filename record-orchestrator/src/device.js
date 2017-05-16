@@ -30,27 +30,29 @@ if (!process.env.IOT_HUB_CONNECTION_STRING) {
     process.exit(-1);
 }
 
-const listeners = [];
-const emitter = new EventEmitter();
-const client = EventHubClient.fromConnectionString(process.env.IOT_HUB_CONNECTION_STRING);
+module.exports = {
+    createConnection
+};
 
-module.exports = emitter;
+function createConnection() {
+    const listeners = [];
+    const emitter = new EventEmitter();
+    const client = EventHubClient.fromConnectionString(process.env.IOT_HUB_CONNECTION_STRING);
 
-client.open()
-    .then(client.getPartitionIds.bind(client))
-    .then((partitionIds) =>
-        partitionIds.map((partitionId) =>
-            client.createReceiver('$Default', partitionId, { 'startAfterTime': Date.now() }).then((receiver) => {
-                console.log('Created partition receiver: ' + partitionId)
-                receiver.on('errorReceived', (err) => emitter.emit('error', err));
-                receiver.on('message', (message) => {
-                    // TODO
-                    const schemaName = '';
-                    const schemaVersion = '';
-                    const payload = new Buffer('');
-                    emitter.emit('message', schemaName, schemaVersion, payload);
-                });
-            })
+    client.open()
+        .then(client.getPartitionIds.bind(client))
+        .then((partitionIds) =>
+            partitionIds.map((partitionId) =>
+                client.createReceiver('$Default', partitionId, { 'startAfterTime': Date.now() }).then((receiver) => {
+                    console.log('Created partition receiver: ' + partitionId)
+                    receiver.on('errorReceived', (err) => emitter.emit('error', err));
+                    receiver.on('message', (message) => {
+                        emitter.emit('message', message.applicationProperties['avro-schema'], message.body);
+                    });
+                })
+            )
         )
-    )
-    .catch((err) => emitter.emit('error', err));
+        .catch((err) => emitter.emit('error', err));
+
+    return emitter;
+}
