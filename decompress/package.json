@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/jonbgallant/azure-iot-avro/issues"
   },
-  "homepage": "https://github.com/jonbgallant/azure-iot-avro#readme"
+  "homepage": "https://github.com/jonbgallant/azure-iot-avro#readme",
+  "dependencies": {
+    "async": "^2.4.0",
+    "avsc": "^5.0.2",
+    "azure": "^2.0.0-preview",
+    "request": "^2.81.0"
+  }
 }

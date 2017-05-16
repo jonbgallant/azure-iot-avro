@@ -22,43 +22,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-const schema = require('./schema');
-const queue = require('./queue');
-const avro = require('./avro');
+const avro = require('avro');
 
-function handleError(err) {
-  // TODO: add something more interesting: error reporting service, analytics, etc
-  console.error(err);
-}
+module.exports = {
+  decompress
+};
 
-function processNextMessage() {
-  queue.getNextDecompressionRequest((err, schemaId, payload) => {
-    if (err) {
-      handleError(err);
-      processNextMessage();
-      return;
+function decompress(schema, payload, cb) {
+  const decoder = new avro.streams.RawDecoder(schema);
+  const dataChunks = [];
+  decoder.on('data', (data) => dataChunks.push(data));
+  decoder.on('finish', () => {
+    try {
+      cb(undefined, JSON.parse(dataChunks.join('')));
+    } catch(err) {
+      cb(err);
     }
-    avro.decompress(schema.getSchema(schemaId), payload, (err, message) => {
-      if (err) {
-        handleError(err);
-      }
-      queue.sendDecompressedMessage(message, (err) => {
-        processNextMessage();
-      });
-    });
   });
+  decoder.setEncoding('utf8');
+  decoder.write(message.body);
+  decoder.end();
 }
-
-schema.init((err) => {
-  if (err) {
-    handleError(err);
-    process.exit(-1);
-  }
-  queue.init((err) => {
-    if (err) {
-      handleError(err);
-      process.exit(-1);
-    }
-    processNextMessage();
-  });
-});

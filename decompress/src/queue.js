@@ -22,43 +22,46 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-const schema = require('./schema');
-const queue = require('./queue');
-const avro = require('./avro');
+const async = require('async');
 
-function handleError(err) {
-  // TODO: add something more interesting: error reporting service, analytics, etc
-  console.error(err);
+module.exports = {
+  init,
+  getNextDecompressionRequest,
+  sendDecompressedMessage
+};
+
+const DECOMPRESSION_REQUEST_QUEUE_NAME = 'decompression_request';
+const STORE_MESSAGE_QUEUE_NAME = 'store_message';
+
+let serviceBusService;
+
+function init(cb) {
+  serviceBusService = azure.createServiceBusService();
+  async.parallel([
+    (next) => serviceBusService.createQueueIfNotExists(DECOMPRESSION_REQUEST_QUEUE_NAME, next),
+    (next) => serviceBusService.createQueueIfNotExists(STORE_MESSAGE_QUEUE_NAME, next)
+  ], cb);
 }
 
-function processNextMessage() {
-  queue.getNextDecompressionRequest((err, schemaId, payload) => {
+function getNextDecompressionRequest(cb) {
+  if (!serviceBusService) {
+    throw new Error('Called `getNextMessage` without initializing the queue first');
+  }
+  serviceBusService.receiveQueueMessage(DECOMPRESSION_REQUEST_QUEUE_NAME, (err, message) => {
     if (err) {
-      handleError(err);
-      processNextMessage();
+      cb(err);
       return;
     }
-    avro.decompress(schema.getSchema(schemaId), payload, (err, message) => {
-      if (err) {
-        handleError(err);
-      }
-      queue.sendDecompressedMessage(message, (err) => {
-        processNextMessage();
-      });
-    });
+    // TODO
+    const schemaId = '';
+    const payload = '';
+    cb(undefined, schemaId, payload);
   });
 }
 
-schema.init((err) => {
-  if (err) {
-    handleError(err);
-    process.exit(-1);
+function sendDecompressedMessage(cb) {
+  if (!serviceBusService) {
+    throw new Error('Called `getNextMessage` without initializing the queue first');
   }
-  queue.init((err) => {
-    if (err) {
-      handleError(err);
-      process.exit(-1);
-    }
-    processNextMessage();
-  });
-});
+  serviceBusService.sendQueueMessage(STORE_MESSAGE_QUEUE_NAME, message, cb);
+}

@@ -22,43 +22,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-const schema = require('./schema');
-const queue = require('./queue');
-const avro = require('./avro');
+const request = require('request');
+const avro = require('avsc');
 
-function handleError(err) {
-  // TODO: add something more interesting: error reporting service, analytics, etc
-  console.error(err);
-}
+module.exports = {
+  init,
+  getSchema
+};
 
-function processNextMessage() {
-  queue.getNextDecompressionRequest((err, schemaId, payload) => {
-    if (err) {
-      handleError(err);
-      processNextMessage();
-      return;
+const types = {};
+
+const ADDRESS = 'localhost';
+const PORT = 3000;
+
+function init(cb) {
+  request(`http://${ADDRESS}:${PORT}/api/allschemas`, (err, res, body) => {
+    const schemas = {};
+    for (const schemaId in schemas) {
+      types[schemaId] = avro.Type.forSchema(schemas[schemaId]);
     }
-    avro.decompress(schema.getSchema(schemaId), payload, (err, message) => {
-      if (err) {
-        handleError(err);
-      }
-      queue.sendDecompressedMessage(message, (err) => {
-        processNextMessage();
-      });
-    });
+    cb();
   });
 }
 
-schema.init((err) => {
-  if (err) {
-    handleError(err);
-    process.exit(-1);
-  }
-  queue.init((err) => {
-    if (err) {
-      handleError(err);
-      process.exit(-1);
-    }
-    processNextMessage();
-  });
-});
+function getType(schemaId) {
+  return types[schemaId];
+}
