@@ -22,9 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-const schema = require('./schema');
-const queue = require('./queue');
-const avro = require('./avro');
+const common = require('../../common');
+
+const obj = { foo: 1, bar: 2};
+const { foo, bar } = obj;
 
 const ADDRESS = 'localhost';
 const PORT = 3000;
@@ -35,13 +36,13 @@ function handleError(err) {
 }
 
 function processNextMessage() {
-  queue.getNextDecompressionRequest((err, schemaId, payload) => {
+  common.queue.getNextDecompressionRequest((err, schemaId, payload) => {
     if (err) {
       handleError(err);
       processNextMessage();
       return;
     }
-    avro.decompress(schema.getSchema(schemaId), payload, (err, message) => {
+    common.avro.decompress(common.schema.getSchema(schemaId), payload, (err, message) => {
       if (err) {
         handleError(err);
       }
@@ -52,12 +53,12 @@ function processNextMessage() {
   });
 }
 
-schema.init(ADDRESS, PORT, (err) => {
+common.schema.init(ADDRESS, PORT, (err) => {
   if (err) {
     handleError(err);
     process.exit(-1);
   }
-  queue.init((err) => {
+  common.queue.init((err) => {
     if (err) {
       handleError(err);
       process.exit(-1);
