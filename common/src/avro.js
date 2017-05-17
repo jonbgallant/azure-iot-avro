@@ -29,7 +29,7 @@ module.exports = {
   decompress
 };
 
-function compress(schemaId, type, messageData, cb) {
+function compress(type, messageData, cb) {
   if (!type.isValid(messageData)) {
     // Keep the API sync/async consistent, see https://nodejs.org/api/process.html#process_process_nexttick_callback_args
     setImmediate(() => cb(new Error('Invalid message data')));

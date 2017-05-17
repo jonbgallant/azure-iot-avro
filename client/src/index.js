@@ -37,11 +37,20 @@ const Message = require('azure-iot-device').Message;
 
 const client = Client.fromConnectionString(process.env.IOT_HUB_DEVICE_CONNECTION_STRING, Protocol);
 
+const SCHEMA_SERVER_ADDRESS = 'localhost';
+const SCHEMA_SERVER_PORT = 3000;
+
 // Create a connection to IoT Hub and then connectCallback.
-client.open((err) => {
-  if (err) {
-    console.error(`Could not connect to IoT Hub: ${err.message}`);
-  } else {
+// common.schema.init(SCHEMA_SERVER_ADDRESS, SCHEMA_SERVER_PORT, (err) => {
+//   if (err) {
+//     console.error(`Could not fetch the schemas from the server: ${err}`);
+//     return;
+//   }
+  client.open((err) => {
+    if (err) {
+      console.error(`Could not connect to IoT Hub: ${err}`);
+      return;
+    }
     console.log('Connected to IoT Hub');
 
     // Send events to IoT Hub on a timer.
@@ -54,7 +63,7 @@ client.open((err) => {
         hum: 14.4
       };
 
-      common.avro.compress(schemaId, type, json, (err, payload) => {
+      common.avro.compress(type, json, (err, payload) => {
         if (err) {
           console.error(err);
           return;
@@ -80,5 +89,5 @@ client.open((err) => {
       clearInterval(sendInterval);
       client.removeAllListeners();
     });
-  }
-});
+  });
+// });

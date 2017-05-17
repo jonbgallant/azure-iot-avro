@@ -34,6 +34,14 @@ const types = {};
 
 function init(schemaServerAddress, schemaServerPort, cb) {
   request(`http://${schemaServerAddress}:${schemaServerPort}/api/allschemas`, (err, res, body) => {
+    if (err) {
+      cb(err);
+      return;
+    }
+    if (res.statusCode !== 200) {
+      cb(new Error(`Schema server return status ${res.statusCode}`));
+      return;
+    }
     const schemas = {};
     for (const schemaId in schemas) {
       types[schemaId] = avro.Type.forSchema(schemas[schemaId]);
