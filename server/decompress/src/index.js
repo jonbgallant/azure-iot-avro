@@ -39,18 +39,23 @@ function handleError(err) {
 
 function processNextMessage() {
   common.queue.getNextDecompressionRequest((err, schemaId, payload) => {
+    console.log('Received decompression request');
     if (err) {
       handleError(err);
       processNextMessage();
       return;
     }
-    common.avro.decompress(common.schema.getSchema(schemaId), payload, (err, message) => {
+    common.avro.decompress(common.schema.getType(schemaId), payload, (err, message) => {
       if (err) {
         handleError(err);
+        processNextMessage();
+        return;
       }
-      queue.sendDecompressedMessage(message, (err) => {
+      common.queue.sendStoreMessageRequest(schemaId, message, (err) => {
         if (err) {
           handleError(err);
+        } else {
+          console.log('Finished processing request');
         }
         processNextMessage();
       });
@@ -58,16 +63,19 @@ function processNextMessage() {
   });
 }
 
+console.log('Initializing schemas from server');
 common.schema.init(ADDRESS, PORT, (err) => {
   if (err) {
     handleError(err);
     process.exit(-1);
   }
+  console.log('Initializing service bus queues');
   common.queue.init((err) => {
     if (err) {
       handleError(err);
       process.exit(-1);
     }
+    console.log('Running');
     processNextMessage();
   });
 });
