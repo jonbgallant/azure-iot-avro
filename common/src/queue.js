@@ -26,8 +26,10 @@ const async = require('async');
 
 module.exports = {
   init,
+  sendDecompressionRequest,
   getNextDecompressionRequest,
-  sendDecompressedMessage
+  sendStoreMessageRequest,
+  getNextStoreMessageRequest
 };
 
 const DECOMPRESSION_REQUEST_QUEUE_NAME = 'decompression_queue';

@@ -22,7 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-const common = require('../../common');
+require('dotenv').config();
+
+const common = require('../../../common');
 
 const obj = { foo: 1, bar: 2};
 const { foo, bar } = obj;

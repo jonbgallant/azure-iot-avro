@@ -30,20 +30,16 @@ module.exports = {
 };
 
 function compress(schemaId, type, messageData, cb) {
-  if (type.isValid(payload)) {
+  if (!type.isValid(messageData)) {
     // Keep the API sync/async consistent, see https://nodejs.org/api/process.html#process_process_nexttick_callback_args
-    setImmediate(() => cb(new Error('Invalid payload')));
+    setImmediate(() => cb(new Error('Invalid message data')));
     return;
   }
 
   const encoder = new avro.streams.RawEncoder(type);
   const dataChunks = [];
   encoder.on('data', (data) => dataChunks.push(data));
-  encoder.on('finish', () => {
-    const message = new Message(Buffer.concat(dataChunks));
-    message.properties.add('avro-schema', schemaId);
-    cb(undefined, message);
-  });
+  encoder.on('finish', () => cb(undefined, Buffer.concat(dataChunks)));
   encoder.write(messageData);
   encoder.end();
 }

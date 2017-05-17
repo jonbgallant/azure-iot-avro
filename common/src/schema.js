@@ -27,7 +27,7 @@ const avro = require('avsc');
 
 module.exports = {
   init,
-  getSchema
+  getType
 };
 
 const types = {};
