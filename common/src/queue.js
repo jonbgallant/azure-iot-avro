@@ -30,8 +30,8 @@ module.exports = {
   sendDecompressedMessage
 };
 
-const DECOMPRESSION_REQUEST_QUEUE_NAME = 'decompression_request';
-const STORE_MESSAGE_QUEUE_NAME = 'store_message';
+const DECOMPRESSION_REQUEST_QUEUE_NAME = 'decompression_queue';
+const STORE_MESSAGE_QUEUE_NAME = 'store_queue';
 
 let serviceBusService;
 
@@ -43,9 +43,21 @@ function init(cb) {
   ], cb);
 }
 
+function sendDecompressionRequest(schemaId, body, cb) {
+  if (!serviceBusService) {
+    throw new Error('Called `sendDecompressionRequest` without initializing the queue first');
+  }
+  serviceBusService.sendQueueMessage(DECOMPRESSION_REQUEST_QUEUE_NAME, {
+    body,
+    customProperties: {
+      'avro-schema': schemaId
+    }
+  }, cb);
+}
+
 function getNextDecompressionRequest(cb) {
   if (!serviceBusService) {
-    throw new Error('Called `getNextMessage` without initializing the queue first');
+    throw new Error('Called `getNextDecompressionRequest` without initializing the queue first');
   }
   serviceBusService.receiveQueueMessage(DECOMPRESSION_REQUEST_QUEUE_NAME, (err, message) => {
     if (err) {
@@ -56,9 +68,9 @@ function getNextDecompressionRequest(cb) {
   });
 }
 
-function sendDecompressedMessage(schemaId, body, cb) {
+function sendStoreMessageRequest(schemaId, body, cb) {
   if (!serviceBusService) {
-    throw new Error('Called `getNextMessage` without initializing the queue first');
+    throw new Error('Called `sendStoreMessageRequest` without initializing the queue first');
   }
   serviceBusService.sendQueueMessage(STORE_MESSAGE_QUEUE_NAME, {
     body,
@@ -66,4 +78,17 @@ function sendDecompressedMessage(schemaId, body, cb) {
       'avro-schema': schemaId
     }
   }, cb);
+}
+
+function getNextStoreMessageRequest(cb) {
+  if (!serviceBusService) {
+    throw new Error('Called `getNextStoreMessageRequest` without initializing the queue first');
+  }
+  serviceBusService.receiveQueueMessage(STORE_MESSAGE_QUEUE_NAME, (err, message) => {
+    if (err) {
+      cb(err);
+      return;
+    }
+    cb(undefined, message.customProperties['avro-schema'], message.body);
+  });
 }
