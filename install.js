@@ -26,6 +26,8 @@ SOFTWARE.
 const spawn = require('child_process').spawn;
 const path = require('path');
 
+const npmCommand = /^win/.test(process.platform) ? 'npm.cmd' : 'npm';
+
 const isDone = {};
 
 let errored = false;
@@ -48,7 +50,7 @@ function finalize(dir, code) {
 
 function install(cwd) {
   isDone[cwd] = false;
-  spawn('npm', [ 'install', '--no-progress' ], {
+  spawn(npmCommand, [ 'install', '--no-progress' ], {
     cwd,
     stdio: 'inherit'
   }).on('exit', (code) => finalize(cwd, code));
