@@ -22,23 +22,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 require('dotenv').config()
+const common = require('../../../common');
 const DocumentDBClient = require('documentdb').DocumentClient
 const express = require('express')
 const path = require('path')
 const fs = require('fs')
 const app = express()
 
-// Configure dynamic port assignment
-const SERVICE_FABRIC_CONFIG = path.join(__dirname, '..', 'SchemasPkg.Endpoints.txt')
-var sfConfExists = fs.existsSync(SERVICE_FABRIC_CONFIG)
-var sfPort = -1
-var defaultFallBackPort = 3000
-var port = process.env.PORT || defaultFallBackPort
-if (sfConfExists) {
-  const endpointsFile = fs.readFileSync(SERVICE_FABRIC_CONFIG, 'utf8')
-  sfPort = endpointsFile.split(';')[3]
-  port = sfPort
+
+function handleError(err) {
+  // TODO: add something more interesting: error reporting service, analytics, etc
+  console.error(err);
 }
+
+common.servicefabric.getServiceFabricPort((error, sfport) => {
+  if(error) {
+    handleError(error);
+    process.exit(-1);
+  }
+  
+var port = process.env.PORT || sfport || 3000;
 
 // Set up Cosmos connection
 var docDbClient = new DocumentDBClient(process.env.HOST, {
@@ -105,3 +108,8 @@ app.get('/api/allSchemas', function (req, res) {
 app.listen(port, function () {
   console.log('listening on ' + port)
 })
+});
+
+
+
+
