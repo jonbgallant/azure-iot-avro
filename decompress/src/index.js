@@ -26,6 +26,9 @@ const schema = require('./schema');
 const queue = require('./queue');
 const avro = require('./avro');
 
+const ADDRESS = 'localhost';
+const PORT = 3000;
+
 function handleError(err) {
   // TODO: add something more interesting: error reporting service, analytics, etc
   console.error(err);
@@ -49,7 +52,7 @@ function processNextMessage() {
   });
 }
 
-schema.init((err) => {
+schema.init(ADDRESS, PORT, (err) => {
   if (err) {
     handleError(err);
     process.exit(-1);

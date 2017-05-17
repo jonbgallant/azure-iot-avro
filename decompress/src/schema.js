@@ -32,11 +32,8 @@ module.exports = {
 
 const types = {};
 
-const ADDRESS = 'localhost';
-const PORT = 3000;
-
-function init(cb) {
-  request(`http://${ADDRESS}:${PORT}/api/allschemas`, (err, res, body) => {
+function init(schemaServerAddress, schemaServerPort, cb) {
+  request(`http://${schemaServerAddress}:${schemaServerPort}/api/allschemas`, (err, res, body) => {
     const schemas = {};
     for (const schemaId in schemas) {
       types[schemaId] = avro.Type.forSchema(schemas[schemaId]);
