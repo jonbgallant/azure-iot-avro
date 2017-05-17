@@ -43,24 +43,32 @@ const listeners = [];
 const client = EventHubClient.fromConnectionString(process.env.IOT_HUB_CONNECTION_STRING);
 
 console.log('Connecting to IoT Hub');
-client.open()
-  .then(client.getPartitionIds.bind(client))
-  .then((partitionIds) =>
-    partitionIds.map((partitionId) =>
-      client.createReceiver('$Default', partitionId, { 'startAfterTime': Date.now() }).then((receiver) => {
-        console.log(`Created partition receiver: ${partitionId}`);
-        receiver.on('errorReceived', handleError);
-        receiver.on('message', (message) => {
-          console.log('Received message from IoT Hub');
-          common.queue.sendDecompressionRequest(message.applicationProperties['avro-schema'], message.body, (err) => {
-            if (err) {
-              handleError(err);
-              return;
+common.queue.init((err) => {
+  if (err) {
+    console.error(`Could not initialize queue: ${err}`);
+    process.exit(-1);
+  }
+  client.open()
+    .then(client.getPartitionIds.bind(client))
+    .then((partitionIds) =>
+      partitionIds.map((partitionId) =>
+        client.createReceiver('$Default', partitionId, { startAfterTime: Date.now() }).then((receiver) => {
+          console.log(`Created partition receiver: ${partitionId}`);
+          receiver.on('errorReceived', handleError);
+          receiver.on('message', (message) => {
+            if (message.applicationProperties && message.applicationProperties['avro-schema']) {
+              console.log('Received Avro message from IoT Hub');
+              common.queue.sendDecompressionRequest(message.applicationProperties['avro-schema'], message.body, (err) => {
+                if (err) {
+                  handleError(err);
+                  return;
+                }
+                console.log('Message sent to Service Bus queue');
+              });
             }
-            console.log('Message sent to Service Bus queue');
           });
-        });
-      })
+        })
+      )
     )
-  )
-  .catch(handleError);
+    .catch(handleError);
+});
