@@ -23,10 +23,15 @@ SOFTWARE.
 */
 require('dotenv').config()
 const DocumentDBClient = require('documentdb').DocumentClient
+const waterfall = require('async-waterfall')
 const express = require('express')
 const path = require('path')
 const fs = require('fs')
 const app = express()
+
+// Stored prodedure definitions
+var allSchemasStoredProc = require('./storedProcedures/allSchemasStoredProc')
+var schemaStoredProc = require('./storedProcedures/schemaStoredProc')
 
 // Configure dynamic port assignment
 const SERVICE_FABRIC_CONFIG = path.join(__dirname, '..', 'SchemasPkg.Endpoints.txt')
@@ -46,58 +51,62 @@ var docDbClient = new DocumentDBClient(process.env.HOST, {
 })
 var databaseUrl = `dbs/${process.env.DATABASE_ID}`
 var collectionUrl = `${databaseUrl}/colls/${process.env.COLLECTION_ID}`
+var allSchemasStoredProcUrl = `${collectionUrl}/sprocs/allSchemasQuery`
+var schemaStoredProcUrl = `${collectionUrl}/sprocs/schemaQuery`
 
-app.get('/api/schema', function (req, res) {
-  var parts = req.query.schemaId.split(':')
-  var querySpec
+// Register the stored procedure if they don't already exist
+var createdStoredProcedure
+waterfall([
+  (callback) => {
+    docDbClient.readStoredProcedure(allSchemasStoredProcUrl, (err, res) => {
+      if (err) {
+        // The stored procedure doesn't exist yet, create it now
+        docDbClient.createStoredProcedure(collectionUrl, allSchemasStoredProc, {}, (err, res) => {
+          if (err) {
+            console.log('Error creating stored procedure: ' + err.code)
+          } else {
+            createdStoredProcedure = res.id
+            console.log('Successfully created stored procedure: ' + createdStoredProcedure)
+          }
+          callback()
+        })
+      } else {
+        callback()
+      }
+    })
+  },
+  () => {
+    docDbClient.readStoredProcedure(schemaStoredProcUrl, (err, res) => {
+      if (err) {
+        // The stored procedure doesn't exist yet, create it now
+        docDbClient.createStoredProcedure(collectionUrl, schemaStoredProc, {}, (err, res) => {
+          if (err) {
+            console.log('Error creating stored procedure: ' + err.code)
+          } else {
+            createdStoredProcedure = res.id
+            console.log('Successfully created stored procedure: ' + createdStoredProcedure)
+          }
+        })
+      }
+    })
+  }])
 
-  // We got both a name and a version
-  if (parts.length > 1) {
-    querySpec = {
-      query: 'SELECT * FROM root r WHERE r.name=@name AND r.version=@version',
-      parameters: [{
-        name: '@name',
-        value: parts[0]
-      }, {
-        name: '@version',
-        value: parts[1]
-      }]
-    }
-  } else { // Request was malformed
-    res.sendStatus(400)
-  }
-
-  docDbClient.queryDocuments(collectionUrl, querySpec).toArray(function (err, results) {
-    if (err || results.length !== 1) {
-      res.sendStatus(500)
+app.get('/api/allSchemas', (req, res) => {
+  docDbClient.executeStoredProcedure(allSchemasStoredProcUrl, null, {}, (err, results) => {
+    if (err) {
+      res.sendStatus(err.code)
     } else {
-      res.send(results[0].schema)
+      res.send(results)
     }
   })
 })
 
-app.get('/api/allSchemas', function (req, res) {
-  var querySpec = {
-    query: 'SELECT * FROM root r'
-  }
-
-  docDbClient.queryDocuments(collectionUrl, querySpec).toArray(function (err, results) {
+app.get('/api/schema', (req, res) => {
+  docDbClient.executeStoredProcedure(schemaStoredProcUrl, req.query.schemaId, {}, (err, results) => {
     if (err) {
-      res.sendStatus(500)
+      res.sendStatus(err.code)
     } else {
-      var schemas = []
-
-      results.forEach(s => {
-        var schema = {
-          schemaId: s.name + ':' + s.version,
-          schema: s.schema
-        }
-        schemas.push(schema)
-      })
-
-      res.send({
-        schemas: schemas
-      })
+      res.send(results[0].schema)
     }
   })
 })
