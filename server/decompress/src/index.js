@@ -47,6 +47,9 @@ function processNextMessage() {
         handleError(err);
       }
       queue.sendDecompressedMessage(message, (err) => {
+        if (err) {
+          handleError(err);
+        }
         processNextMessage();
       });
     });
