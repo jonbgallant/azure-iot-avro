@@ -57,5 +57,8 @@ function init(schemaServerAddress, schemaServerPort, cb) {
 }
 
 function getType(schemaId) {
+  if (!types[schemaId]) {
+    throw new Error(`Uknown schema ID ${schemaId}`);
+  }
   return types[schemaId];
 }

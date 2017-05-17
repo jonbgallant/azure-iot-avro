@@ -45,9 +45,6 @@ common.schema.init(SCHEMA_SERVER_ADDRESS, SCHEMA_SERVER_PORT, (err) => {
     return;
   }
   const type = common.schema.getType(SCHEMA_ID);
-  if (!type) {
-    console.error(`Could not look up schema for schema ID ${SCHEMA_ID}`);
-  }
   console.log('Connecting to IoT Hub');
   client.open((err) => {
     if (err) {
