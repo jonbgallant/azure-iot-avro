@@ -21,3 +21,41 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+const request = require('request');
+const avro = require('avsc');
+
+module.exports = {
+  init,
+  getType
+};
+
+const types = {};
+
+function init(schemaServerAddress, schemaServerPort, cb) {
+  request(`http://${schemaServerAddress}:${schemaServerPort}/api/allschemas`, (err, res, body) => {
+    if (err) {
+      cb(err);
+      return;
+    }
+    if (res.statusCode !== 200) {
+      cb(new Error(`Schema server return status ${res.statusCode}`));
+      return;
+    }
+    let schemas;
+    try {
+      schemas = JSON.parse(body).schemas;
+    } catch(e) {
+      cb(e);
+      return;
+    }
+    for (const schema of schemas) {
+      types[schema.schemaId] = avro.Type.forSchema(schema.schema);
+    }
+    cb();
+  });
+}
+
+function getType(schemaId) {
+  return types[schemaId];
+}

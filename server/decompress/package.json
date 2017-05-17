@@ -1,0 +1,25 @@
+{
+  "name": "decompress",
+  "version": "1.0.0",
+  "description": "The decompression microservice",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonbgallant/azure-iot-avro.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jonbgallant/azure-iot-avro/issues"
+  },
+  "homepage": "https://github.com/jonbgallant/azure-iot-avro#readme",
+  "dependencies": {
+    "async": "^2.4.0",
+    "avsc": "^5.0.2",
+    "azure": "^2.0.0-preview",
+    "request": "^2.81.0"
+  }
+}
