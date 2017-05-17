@@ -1,8 +1,0 @@
-{
-    "name": "telemetry",
-    "type": "record",
-    "fields": [
-        { "name": "tmp", "type": "float" },
-        { "name": "hum", "type": "float" }
-    ]
-}

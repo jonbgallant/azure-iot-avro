@@ -42,9 +42,15 @@ function init(schemaServerAddress, schemaServerPort, cb) {
       cb(new Error(`Schema server return status ${res.statusCode}`));
       return;
     }
-    const schemas = {};
-    for (const schemaId in schemas) {
-      types[schemaId] = avro.Type.forSchema(schemas[schemaId]);
+    let schemas;
+    try {
+      schemas = JSON.parse(body).schemas;
+    } catch(e) {
+      cb(e);
+      return;
+    }
+    for (const schema of schemas) {
+      types[schema.schemaId] = avro.Type.forSchema(schema.schema);
     }
     cb();
   });

@@ -26,10 +26,7 @@ require('dotenv').config();
 
 const common = require('../../common');
 
-const path = require('path');
-const avro = require('avsc');
-const schemaId = 'schema1:1.0.0';
-const type = avro.parse(path.join(__dirname, '..', 'schema.avsc'));
+const SCHEMA_ID = 'schema1:1.0.0';
 
 const Protocol = require('azure-iot-device-amqp').Amqp;
 const Client = require('azure-iot-device').Client;
@@ -41,11 +38,17 @@ const SCHEMA_SERVER_ADDRESS = 'localhost';
 const SCHEMA_SERVER_PORT = 3000;
 
 // Create a connection to IoT Hub and then connectCallback.
-// common.schema.init(SCHEMA_SERVER_ADDRESS, SCHEMA_SERVER_PORT, (err) => {
-//   if (err) {
-//     console.error(`Could not fetch the schemas from the server: ${err}`);
-//     return;
-//   }
+console.log('Initializing schemas from server');
+common.schema.init(SCHEMA_SERVER_ADDRESS, SCHEMA_SERVER_PORT, (err) => {
+  if (err) {
+    console.error(`Could not fetch the schemas from the server: ${err}`);
+    return;
+  }
+  const type = common.schema.getType(SCHEMA_ID);
+  if (!type) {
+    console.error(`Could not look up schema for schema ID ${SCHEMA_ID}`);
+  }
+  console.log('Connecting to IoT Hub');
   client.open((err) => {
     if (err) {
       console.error(`Could not connect to IoT Hub: ${err}`);
@@ -69,7 +72,7 @@ const SCHEMA_SERVER_PORT = 3000;
           return;
         }
         const message = new Message(payload);
-        message.properties.add('avro-schema', schemaId);
+        message.properties.add('avro-schema', SCHEMA_ID);
         console.log('Sending message: ' + message.getData());
         client.sendEvent(message, (err, res) => {
           if (err) {
@@ -90,4 +93,4 @@ const SCHEMA_SERVER_PORT = 3000;
       client.removeAllListeners();
     });
   });
-// });
+});
