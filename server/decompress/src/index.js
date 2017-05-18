@@ -48,7 +48,7 @@ function processNextMessage() {
         processNextMessage();
         return;
       }
-      common.queue.sendStoreMessageRequest(schemaId, message, (err) => {
+      common.queue.sendStoreMessageRequest(schemaId, JSON.stringify(message), (err) => {
         if (err) {
           handleError(err);
         } else {

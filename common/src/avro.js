@@ -45,16 +45,8 @@ function compress(type, messageData, cb) {
 }
 
 function decompress(type, payload, cb) {
-  const decoder = new avro.streams.RawDecoder(type);
-  const dataChunks = [];
-  decoder.on('data', (data) => {
-    dataChunks.push(data)
-  });
-  decoder.on('finish', () => {
-    cb(undefined, dataChunks.join(''));
-  });
-  decoder.on('error', (err) => {
-    console.error(err);
-  });
-  decoder.end(payload);
+  const val = type.fromBuffer(payload);
+  // Still wrap in a setImmediate in case this method gets more complicated
+  // and we need it to be async again
+  setImmediate(() => cb(undefined, val));
 }
