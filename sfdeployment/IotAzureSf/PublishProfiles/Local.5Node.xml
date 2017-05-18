@@ -8,4 +8,5 @@
   -->
   <ClusterConnectionParameters />
   <ApplicationParameterFile Path="..\ApplicationParameters\Local.5Node.xml" />
+  <CopyPackageParameters CopyPackageTimeoutSec="1800" CompressPackage="true" />
 </PublishProfile>

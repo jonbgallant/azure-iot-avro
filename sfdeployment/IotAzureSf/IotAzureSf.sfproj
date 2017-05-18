@@ -27,9 +27,19 @@
     <None Include="Scripts\Deploy-FabricApplication.ps1" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\..\server\decompress\**\*.*">
+      <Link>ApplicationPackageRoot\DecompressionServicePkg\Code\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
+    <Content Include="..\..\server\message\**\*.*">
+      <Link>ApplicationPackageRoot\MessageServicePkg\Code\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Content>
     <Content Include="..\..\server\schema\**\*.*">
       <Link>ApplicationPackageRoot\SchemaServicePkg\Code\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Content>
+    <Content Include="ApplicationPackageRoot\DecompressionServicePkg\Config\Settings.xml" />
+    <Content Include="ApplicationPackageRoot\DecompressionServicePkg\ServiceManifest.xml" />
+    <Content Include="ApplicationPackageRoot\MessageServicePkg\Config\Settings.xml" />
+    <Content Include="ApplicationPackageRoot\MessageServicePkg\ServiceManifest.xml" />
     <Content Include="ApplicationPackageRoot\SchemaServicePkg\Config\Settings.xml" />
     <Content Include="ApplicationPackageRoot\SchemaServicePkg\ServiceManifest.xml" />
     <Content Include="packages.config" />

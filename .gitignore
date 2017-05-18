@@ -49,6 +49,7 @@ jspm_packages
 obj
 bin
 pkg
+.vs 
 sfdeployment/packages/
 
 # Post install artifacts
