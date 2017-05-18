@@ -22,11 +22,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-require('dotenv').config()
 const DocumentDBClient = require('documentdb').DocumentClient
 
 module.exports = {
   write
+};
+
+
+if (!process.env.HOST) {
+  console.error('Environment variable HOST is not defined');
+  process.exit(-1);
+}
+if (!process.env.DATABASE_ID) {
+  console.error('Environment variable DATABASE_ID is not defined');
+  process.exit(-1);
+}
+if (!process.env.COLLECTION_ID) {
+  console.error('Environment variable COLLECTION_ID is not defined');
+  process.exit(-1);
+}
+if (!process.env.AUTH_KEY) {
+  console.error('Environment variable AUTH_KEY is not defined');
+  process.exit(-1);
 }
 
 var docDbClient = new DocumentDBClient(process.env.HOST, {
