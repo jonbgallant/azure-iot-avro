@@ -49,7 +49,7 @@ jspm_packages
 obj
 bin
 pkg
-sfdeployment/packages/.env
+sfdeployment/packages/
 
 # Post install artifacts
 server/schema/node.exe
