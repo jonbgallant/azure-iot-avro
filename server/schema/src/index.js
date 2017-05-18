@@ -21,98 +21,102 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-require('dotenv').config()
-const common = require('common')
-const DocumentDBClient = require('documentdb').DocumentClient
-const waterfall = require('async-waterfall')
-const express = require('express')
-const app = express()
+
+require('dotenv').config();
+
+const common = require('common');
+const DocumentDBClient = require('documentdb').DocumentClient;
+const waterfall = require('async-waterfall');
+const express = require('express');
+const app = express();
 
 // Stored prodedure definitions
-var allSchemasStoredProc = require('./storedProcedures/allSchemasStoredProc')
-var schemaStoredProc = require('./storedProcedures/schemaStoredProc')
+const allSchemasStoredProc = require('./storedProcedures/allSchemasStoredProc');
+const schemaStoredProc = require('./storedProcedures/schemaStoredProc');
 
 function handleError (err) {
   // TODO: add something more interesting: error reporting service, analytics, etc
-  console.error(err)
+  console.error(err);
 }
 
+console.log('Starting schema server');
 common.servicefabric.getServiceFabricPort((error, sfport) => {
   if (error) {
-    handleError(error)
-    process.exit(-1)
+    handleError(error);
+    process.exit(-1);
   }
 
-  var port = process.env.PORT || sfport || 3000
+  const port = process.env.PORT || sfport || 3000;
 
   // Set up Cosmos connection
-  var docDbClient = new DocumentDBClient(process.env.COSMOS_HOST, {
+  const docDbClient = new DocumentDBClient(process.env.COSMOS_HOST, {
     masterKey: process.env.COSMOS_AUTH_KEY
-  })
-  var databaseUrl = `dbs/${process.env.COSMOS_DATABASE_ID}`
-  var collectionUrl = `${databaseUrl}/colls/${process.env.COSMOS_COLLECTION_ID}`
-  var allSchemasStoredProcUrl = `${collectionUrl}/sprocs/allSchemasQuery`
-  var schemaStoredProcUrl = `${collectionUrl}/sprocs/schemaQuery`
+  });
+  const databaseUrl = `dbs/${process.env.COSMOS_DATABASE_ID}`;
+  const collectionUrl = `${databaseUrl}/colls/${process.env.COSMOS_COLLECTION_ID}`;
+  const allSchemasStoredProcUrl = `${collectionUrl}/sprocs/allSchemasQuery`;
+  const schemaStoredProcUrl = `${collectionUrl}/sprocs/schemaQuery`;
 
   // Register the stored procedure if they don't already exist
-  var createdStoredProcedure
+  let createdStoredProcedure;
   waterfall([
-    (callback) => {
+    (next) => {
       docDbClient.readStoredProcedure(allSchemasStoredProcUrl, (err, res) => {
-        if (err) {
-          // The stored procedure doesn't exist yet, create it now
-          docDbClient.createStoredProcedure(collectionUrl, allSchemasStoredProc, {}, (err, res) => {
-            if (err) {
-              console.log('Error creating stored procedure: ' + err.code)
-            } else {
-              createdStoredProcedure = res.id
-              console.log('Successfully created stored procedure: ' + createdStoredProcedure)
-            }
-            callback()
-          })
-        } else {
-          callback()
+        if (!err) {
+          next();
+          return;
         }
+        // The stored procedure doesn't exist yet, create it now
+        docDbClient.createStoredProcedure(collectionUrl, allSchemasStoredProc, {}, (err, res) => {
+          if (err) {
+            console.log(`Error creating stored procedure: ${err.code}`);
+          } else {
+            createdStoredProcedure = res.id;
+            console.log(`Successfully created stored procedure: ${createdStoredProcedure}`);
+          }
+          next();
+        });
       })
     },
-    () => {
+    (next) => {
       docDbClient.readStoredProcedure(schemaStoredProcUrl, (err, res) => {
         if (err) {
           // The stored procedure doesn't exist yet, create it now
           docDbClient.createStoredProcedure(collectionUrl, schemaStoredProc, {}, (err, res) => {
             if (err) {
-              console.log('Error creating stored procedure: ' + err.code)
+              console.log('Error creating stored procedure: ' + err.code);
             } else {
-              createdStoredProcedure = res.id
-              console.log('Successfully created stored procedure: ' + createdStoredProcedure)
+              createdStoredProcedure = res.id;
+              console.log('Successfully created stored procedure: ' + createdStoredProcedure);
             }
-          })
+            next();
+          });
         }
-      })
-    }])
+      });
+    }]);
 
   app.get('/api/allSchemas', (req, res) => {
     docDbClient.executeStoredProcedure(allSchemasStoredProcUrl, null, {}, (err, results) => {
       if (err) {
-        res.sendStatus(err.code)
+        res.sendStatus(err.code);
       } else {
-        res.send(results)
+        res.send(results);
       }
-    })
-  })
+    });
+  });
 
   app.get('/api/schema', (req, res) => {
     docDbClient.executeStoredProcedure(schemaStoredProcUrl, req.query.schemaId, {}, (err, results) => {
       if (err) {
-        res.sendStatus(err.code)
+        res.sendStatus(err.code);
       } else {
-        res.send(results[0].schema)
+        res.send(results[0].schema);
       }
     })
   })
 
-  app.listen(port, function () {
-    console.log('listening on ' + port)
-  })
+  app.listen(port, () => {
+    console.log(`Schema server listening on port ${port}`);
+  });
 })
 
