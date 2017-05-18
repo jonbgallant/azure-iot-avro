@@ -1,6 +1,8 @@
 # Azure IOT AVRO
 
-## Installation Steps
+## Setup Steps
+
+### Project Installation
 
 Start by installing all dependencies with:
 
@@ -9,6 +11,10 @@ node install.js
 ```
 
 This process will take several minutes, now would be a good time to grab a coffee.
+
+### Cosmos DB
+
+To set up an instance of Cosmos DB you will first need an [Azure](https://azure.microsoft.com/en-us/account/) account. 
 
 ## Debugging the common module
 
@@ -26,3 +32,8 @@ npm link common
 cd ../schema
 npm link common
 ```
+
+## Microservices Overview
+
+### Schema Service
+
