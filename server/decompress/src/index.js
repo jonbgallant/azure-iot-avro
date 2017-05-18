@@ -24,10 +24,7 @@ SOFTWARE.
 
 require('dotenv').config();
 
-const common = require('../../../common');
-
-const obj = { foo: 1, bar: 2};
-const { foo, bar } = obj;
+const common = require('common');
 
 const ADDRESS = 'localhost';
 const PORT = 3000;
@@ -39,13 +36,13 @@ function handleError(err) {
 
 function processNextMessage() {
   common.queue.getNextDecompressionRequest((err, schemaId, payload) => {
-    console.log('Received decompression request');
     if (err) {
       handleError(err);
       processNextMessage();
       return;
     }
-    common.avro.decompress(common.schema.getType(schemaId), payload, (err, message) => {
+    console.log('Received decompression request');
+    common.avro.decompress(common.schema.getType(schemaId), new Buffer(payload, 'base64'), (err, message) => {
       if (err) {
         handleError(err);
         processNextMessage();

@@ -59,7 +59,7 @@ common.schema.init(SCHEMA_SERVER_ADDRESS, SCHEMA_SERVER_PORT, (err) => {
       // Generate the faux json
       const tmp = 10 + (Math.random() * 4); // range: [10, 14]
       const json = {
-        tmp,
+        tmp: 98.6,
         hum: 14.4
       };
 
@@ -68,7 +68,7 @@ common.schema.init(SCHEMA_SERVER_ADDRESS, SCHEMA_SERVER_PORT, (err) => {
           console.error(err);
           return;
         }
-        const message = new Message(payload);
+        const message = new Message(payload.toString('base64'));
         message.properties.add('avro-schema', SCHEMA_ID);
         console.log('Sending message: ' + message.getData());
         client.sendEvent(message, (err, res) => {

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 require('dotenv').config()
-const common = require('../../../common')
+const common = require('common')
 const DocumentDBClient = require('documentdb').DocumentClient
 const waterfall = require('async-waterfall')
 const express = require('express')

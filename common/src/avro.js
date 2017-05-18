@@ -47,15 +47,15 @@ function compress(type, messageData, cb) {
 function decompress(type, payload, cb) {
   const decoder = new avro.streams.RawDecoder(type);
   const dataChunks = [];
-  decoder.on('data', (data) => dataChunks.push(data));
-  decoder.on('finish', () => {
-    try {
-      cb(undefined, JSON.parse(dataChunks.join('')));
-    } catch(err) {
-      cb(err);
-    }
+  decoder.on('data', (data) => {
+    dataChunks.push(data)
   });
-  decoder.setEncoding('utf8');
+  decoder.on('finish', () => {
+    cb(undefined, dataChunks.join(''));
+  });
+  decoder.on('error', (err) => {
+    console.error(err);
+  });
   decoder.write(payload);
   decoder.end();
 }
