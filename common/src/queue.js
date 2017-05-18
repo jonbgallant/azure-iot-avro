@@ -33,6 +33,11 @@ module.exports = {
   getNextStoreMessageRequest
 };
 
+if (!process.env.AZURE_SERVICEBUS_CONNECTION_STRING) {
+  console.error('Environment variable AZURE_SERVICEBUS_CONNECTION_STRING is not defined');
+  process.exit(-1);
+}
+
 const DECOMPRESSION_REQUEST_QUEUE_NAME = 'decompression_queue';
 const STORE_MESSAGE_QUEUE_NAME = 'store_queue';
 
