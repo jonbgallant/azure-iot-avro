@@ -60,7 +60,6 @@ console.log('Installing all dependencies');
 
 install(path.join(__dirname, 'client'));
 install(path.join(__dirname, 'common'));
-install(path.join(__dirname, 'server', 'iot-hub-message-router'));
 install(path.join(__dirname, 'server', 'decompress'));
 install(path.join(__dirname, 'server', 'message'));
 install(path.join(__dirname, 'server', 'schema'));
