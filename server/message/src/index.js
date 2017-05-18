@@ -24,6 +24,7 @@ SOFTWARE.
 
 require('dotenv').config();
 
+const express = require('express');
 const common = require('common');
 
 const ADDRESS = 'localhost';
@@ -59,6 +60,24 @@ common.queue.init((err) => {
     handleError(err);
     process.exit(-1);
   }
-  console.log('Running');
-  processNextMessage();
+  console.log('Starting heartbeat server');
+  common.servicefabric.getServiceFabricPort((error, sfport) => {
+    if (error) {
+      handleError(error)
+      process.exit(-1)
+    }
+
+    const port = process.env.PORT || sfport || 3002;
+    const app = express();
+
+    app.get('/api/heartbeat', (req, res) => {
+      res.send('OK');
+    });
+
+    console.log(`Starting heartbeat server on port ${port}`);
+    app.listen(port, () => {
+      console.log('Running');
+      processNextMessage();
+    });
+  });
 });
