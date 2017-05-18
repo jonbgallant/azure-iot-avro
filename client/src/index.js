@@ -24,7 +24,7 @@ SOFTWARE.
 
 require('dotenv').config();
 
-const common = require('../../common');
+const common = require('common');
 
 const SCHEMA_ID = 'schema1:1.0.0';
 

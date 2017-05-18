@@ -21,6 +21,7 @@
     "avsc": "^5.0.2",
     "azure-iot-device": "^1.1.11",
     "azure-iot-device-amqp": "^1.1.11",
-    "dotenv": "^4.0.0"
+    "dotenv": "^4.0.0",
+    "common": "../common"
   }
 }
