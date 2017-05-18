@@ -45,6 +45,12 @@ jspm_packages
 # Environment Variables
 .env
 
+# VS Build Artefacts
+obj
+bin
+pkg
+sfdeployment/packages/
+
 # Post install artifacts
 server/schema/node.exe
 server/decompress/node.exe
