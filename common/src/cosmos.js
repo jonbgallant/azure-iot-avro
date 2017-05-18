@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+const moment = require('moment')
 const DocumentDBClient = require('documentdb').DocumentClient
 
 module.exports = {
@@ -53,9 +54,17 @@ var databaseUrl = `dbs/${process.env.DATABASE_ID}`
 var collectionUrl = `${databaseUrl}/colls/${process.env.COLLECTION_ID}`
 
 function write (schemaId, message, cb) {
+  // Ensure message is a valid JSON object before parsing
+  if (message === ""){
+    msgObj = {}
+  } else {
+    var msgObj = JSON.parse(message)
+  }
+
   var docToCreate = {
     schemaId: schemaId,
-    message: JSON.parse(message)
+    timestamp: moment().format('MMMM Do YYYY, h:mm:ss a'),
+    message: msgObj
   }
 
   docDbClient.createDocument(collectionUrl, docToCreate, {}, (err, documentCreated) => {
