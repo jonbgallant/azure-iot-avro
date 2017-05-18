@@ -29,29 +29,28 @@ module.exports = {
   write
 };
 
+if (!process.env.COSMOS_HOST) {
+  console.error('Environment variable COSMOS_HOST is not defined');
+  process.exit(-1);
+}
+if (!process.env.COSMOS_DATABASE_ID) {
+  console.error('Environment variable COSMOS_DATABASE_ID is not defined');
+  process.exit(-1);
+}
+if (!process.env.COSMOS_COLLECTION_ID) {
+  console.error('Environment variable COSMOS_COLLECTION_ID is not defined');
+  process.exit(-1);
+}
+if (!process.env.COSMOS_AUTH_KEY) {
+  console.error('Environment variable COSMOS_AUTH_KEY is not defined');
+  process.exit(-1);
+}
 
-if (!process.env.HOST) {
-  console.error('Environment variable HOST is not defined');
-  process.exit(-1);
-}
-if (!process.env.DATABASE_ID) {
-  console.error('Environment variable DATABASE_ID is not defined');
-  process.exit(-1);
-}
-if (!process.env.COLLECTION_ID) {
-  console.error('Environment variable COLLECTION_ID is not defined');
-  process.exit(-1);
-}
-if (!process.env.AUTH_KEY) {
-  console.error('Environment variable AUTH_KEY is not defined');
-  process.exit(-1);
-}
-
-var docDbClient = new DocumentDBClient(process.env.HOST, {
-    masterKey: process.env.AUTH_KEY
+var docDbClient = new DocumentDBClient(process.env.COSMOS_HOST, {
+    masterKey: process.env.COSMOS_AUTH_KEY
   })
-var databaseUrl = `dbs/${process.env.DATABASE_ID}`
-var collectionUrl = `${databaseUrl}/colls/${process.env.COLLECTION_ID}`
+var databaseUrl = `dbs/${process.env.COSMOS_DATABASE_ID}`
+var collectionUrl = `${databaseUrl}/colls/${process.env.COSMOS_COLLECTION_ID}`
 
 function write (schemaId, message, cb) {
   // Ensure message is a valid JSON object before parsing
