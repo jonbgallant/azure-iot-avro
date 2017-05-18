@@ -26,5 +26,6 @@ module.exports = {
   avro: require('./avro'),
   queue: require('./queue'),
   schema: require('./schema'),
+  cosmos: require('./cosmos'),
   servicefabric: require('./servicefabric')
 };

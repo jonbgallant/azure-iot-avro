@@ -1,0 +1,25 @@
+{
+  "name": "azure-iot-avro",
+  "version": "1.0.0",
+  "description": "Start by installing all dependencies with:",
+  "main": "install.js",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "install": "cd client && npm i && cd ../server/decompress && npm i && cd ../message && npm i && cd ../schema && npm i",
+    "client": "cd client && node src/index.js",
+    "schema": "cd server/schema && node src/index.js",
+    "decompress": "cd server/decompress && node src/index.js",
+    "message": "cd server/message && node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonbgallant/azure-iot-avro.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jonbgallant/azure-iot-avro/issues"
+  },
+  "homepage": "https://github.com/jonbgallant/azure-iot-avro#readme"
+}

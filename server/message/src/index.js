@@ -21,3 +21,44 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+require('dotenv').config();
+
+const common = require('common');
+
+const ADDRESS = 'localhost';
+const PORT = 3000;
+
+function handleError(err) {
+  // TODO: add something more interesting: error reporting service, analytics, etc
+  console.error(err);
+}
+
+function processNextMessage() {
+  common.queue.getNextStoreMessageRequest((err, schemaId, payload) => {
+    console.log('Received message request');
+    if (err) {
+      handleError(err);
+      processNextMessage();
+      return;
+    }
+    common.cosmos.write(schemaId, payload, (err, messageId) => {
+      if (err) {
+        handleError(err);
+      } else {
+        console.log("Wrote message to db with id " + messageId)
+      }
+      processNextMessage();
+    });
+  });
+}
+
+console.log('Initializing service bus queues');
+common.queue.init((err) => {
+  if (err) {
+    handleError(err);
+    process.exit(-1);
+  }
+  console.log('Running');
+  processNextMessage();
+});
