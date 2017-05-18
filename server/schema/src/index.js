@@ -46,11 +46,11 @@ common.servicefabric.getServiceFabricPort((error, sfport) => {
   var port = process.env.PORT || sfport || 3000
 
   // Set up Cosmos connection
-  var docDbClient = new DocumentDBClient(process.env.HOST, {
-    masterKey: process.env.AUTH_KEY
+  var docDbClient = new DocumentDBClient(process.env.COSMOS_HOST, {
+    masterKey: process.env.COSMOS_AUTH_KEY
   })
-  var databaseUrl = `dbs/${process.env.DATABASE_ID}`
-  var collectionUrl = `${databaseUrl}/colls/${process.env.COLLECTION_ID}`
+  var databaseUrl = `dbs/${process.env.COSMOS_DATABASE_ID}`
+  var collectionUrl = `${databaseUrl}/colls/${process.env.COSMOS_COLLECTION_ID}`
   var allSchemasStoredProcUrl = `${collectionUrl}/sprocs/allSchemasQuery`
   var schemaStoredProcUrl = `${collectionUrl}/sprocs/schemaQuery`
 
