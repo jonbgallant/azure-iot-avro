@@ -44,3 +44,8 @@ jspm_packages
 
 # Environment Variables
 .env
+
+# Post install artifacts
+server/schema/node.exe
+server/decompress/node.exe
+server/message/node.exe

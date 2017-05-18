@@ -4,9 +4,12 @@
   "description": "Start by installing all dependencies with:",
   "main": "install.js",
   "dependencies": {},
-  "devDependencies": {},
+  "devDependencies": {
+    "cpx": "^1.5.0"
+  },
   "scripts": {
-    "install": "cd client && npm i && cd ../server/decompress && npm i && cd ../message && npm i && cd ../schema && npm i",
+    "install-all": "npm install && cd client && npm i && cd ../server/decompress && npm i && cd ../message && npm i && cd ../schema && npm i",
+    "postinstall-all": "cpx external/node.exe server/schema && cpx external/node.exe server/decompress && cpx external/node.exe server/message",
     "client": "cd client && node src/index.js",
     "schema": "cd server/schema && node src/index.js",
     "decompress": "cd server/decompress && node src/index.js",

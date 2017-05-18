@@ -25,23 +25,32 @@ SOFTWARE.
 const path = require('path');
 const fs = require('fs');
 
+const SERVICE_FABRIC_CONFIG_FILENAME = 'SchemasPkg.Endpoints.txt';
+
 module.exports = {
   getServiceFabricPort
 };
 
 function getServiceFabricPort(cb) {
-    const SERVICE_FABRIC_CONFIG = path.join(__dirname, '..', 'SchemasPkg.Endpoints.txt');
-    fs.exists(SERVICE_FABRIC_CONFIG, (exists) => {
-        if (!exists) {
-            cb(undefined, undefined); // Undefined is normal behaviour when no SF endpoints are found.
-            return;
-        }
-        fs.readFile(SERVICE_FABRIC_CONFIG, 'utf8', (error, contents) => {
-            if(error) {
-                cb(error);
+    function checkDir(dir) {
+        const SERVICE_FABRIC_CONFIG = path.join(dir, SERVICE_FABRIC_CONFIG_FILENAME);
+        fs.exists(SERVICE_FABRIC_CONFIG, (exists) => {
+            if (!exists) {
+                if (dir === path.dirname(dir)) {
+                    cb(undefined, undefined); // Undefined is normal behaviour when no SF endpoints are found.
+                } else {
+                    checkDir(path.dirname(dir));
+                }
                 return;
             }
-            cb(undefined, contents.split(';')[3]);
+            fs.readFile(SERVICE_FABRIC_CONFIG, 'utf8', (error, contents) => {
+                if(error) {
+                    cb(error);
+                    return;
+                }
+                cb(undefined, contents.split(';')[3]);
+            });
         });
-    });     
+    }
+    checkDir(path.join(__dirname, '..', '..', '..'));
 }

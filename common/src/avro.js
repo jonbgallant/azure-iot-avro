@@ -56,6 +56,5 @@ function decompress(type, payload, cb) {
   decoder.on('error', (err) => {
     console.error(err);
   });
-  decoder.write(payload);
-  decoder.end();
+  decoder.end(payload);
 }
