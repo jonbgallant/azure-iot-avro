@@ -68,7 +68,9 @@ The message service listens to the store message request queue that the decompre
 The 'sfdeployment'directory contains everything you should need to deploy the services as a service fabric guest app, into either a local or remote service fabric cluster:
 
 ### Pre requisites
-You'll need to follow the azure guide to [Setting up a service fabric dev. environment](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-get-started)
+- You'll need to follow the azure guide to [Setting up a service fabric dev. environment](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-get-started)
+- If you want to deploy and work locally then you'll also need to [Set up and configure a local cluster](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-get-started-with-a-local-cluster)
+- To get started with Service Fabric in Azure you'll need to [Create a service fabric cluster in the Azure portal](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-cluster-creation-via-portal)
 
 ### Deploying to local cluster.
 1) Load the IoTAzure solution, and build the guest executable package.
