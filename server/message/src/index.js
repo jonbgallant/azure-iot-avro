@@ -63,8 +63,8 @@ common.queue.init((err) => {
   console.log('Starting heartbeat server');
   common.servicefabric.getServiceFabricPort((error, sfport) => {
     if (error) {
-      handleError(error)
-      process.exit(-1)
+      handleError(error);
+      process.exit(-1);
     }
 
     const port = process.env.PORT || sfport || 3002;
